@@ -9,16 +9,26 @@ provider "helm" {
     }
 }
 
+resource "azurerm_resource_group" "file_drop_rg" {
+  name     = var.resource_group
+  location = var.region
+
+  tags = {
+    created_by         = "Glasswall Solutions"
+    deployment_version = "1.0.0"
+  }
+}
+
 resource "azurerm_kubernetes_cluster" "file-drop" {
   name                = var.cluster_name
-  location            = var.region
-  resource_group_name = var.resource_group
+  location            = azurerm_resource_group.file_drop_rg.location
+  resource_group_name = azurerm_resource_group.file_drop_rg.name
   dns_prefix          = "${var.cluster_name}-k8s"
 
   default_node_pool {
     name            = var.node_name
     node_count      = 1
-    vm_size         = "Standard_A4_v2"
+    vm_size         = "Standard_A2_v2"
     os_disk_size_gb = 40
   }
 
@@ -52,7 +62,7 @@ resource "helm_release" "file-drop" {
   
   set {
         name  = "nginx.ingress.host"
-        value = var.dns_name_01
+        value = var.file_drop_dns_name_01
     }
 
   depends_on = [ 
@@ -83,6 +93,11 @@ resource "helm_release" "ingress-nginx" {
   wait             = true
   cleanup_on_fail  = true
 
+  set {
+        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-dns-label-name"
+        value = var.a_record_02
+    }
+
   depends_on = [ 
     azurerm_kubernetes_cluster.file-drop,
    ]
@@ -92,10 +107,22 @@ resource "null_resource" "get_kube_context" {
 
  provisioner "local-exec" {
 
-    command = "/bin/bash az aks get-credentials --resource-group ${var.resource_group} --name ${var.cluster_name} --overwrite-existing"
+    command = "az aks get-credentials --resource-group ${var.resource_group} --name ${var.cluster_name} --overwrite-existing"
   }
   
   depends_on = [
     azurerm_kubernetes_cluster.file-drop,
+  ]
+}
+
+resource "null_resource" "load_k8_secrets" {
+
+ provisioner "local-exec" {
+
+    command = "/bin/bash ./scripts/k8s_scripts/file-drop-secrets.sh ${var.cluster_name}"
+  }
+
+  depends_on = [
+    null_resource.get_kube_context,
   ]
 }

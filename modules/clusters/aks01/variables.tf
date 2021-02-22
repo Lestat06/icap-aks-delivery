@@ -107,7 +107,7 @@ variable "namespace03" {
 variable "chart_repo03" {
   description = "This is the path to the chart"
   type        = string
-  default 	  = "ingress-nginx/ingress-nginx"
+  default 	  = "./charts/icap-infrastructure/ingress-nginx"
 }
 
 ## Administration Chart
@@ -129,16 +129,16 @@ variable "chart_path04" {
   default 	  = "./charts/icap-infrastructure/administration"
 }
 
-variable "dns_name_02" {
+variable "dns_name_04" {
   description = "DNS name for Management-UI"
   type = string
-  default = "management-ui-ukw.ukwest.cloudapp.azure.com"
+  default = "management-ui.ukwest.cloudapp.azure.com"
 }
 
-variable "dns_name_03" {
-  description = "DNS name for Identity Management-UI"
+variable "a_record_01" {
+  description = "A record for Management-UI"
   type = string
-  default = "management-ui-ukw.ukwest.cloudapp.azure.com"
+  default = "management-ui"
 }
 
 ## Rabbitmq-Operator Chart
@@ -178,3 +178,17 @@ variable "chart_path06" {
   type        = string
   default 	  = "./charts/icap-infrastructure/ncfs"
 }
+
+
+variable "storage_resource" {
+  description = "This is storage_resource"
+  type        = string
+
+}
+
+variable "kv_vault_name" {
+  description = "This is kv_vault_name"
+  type        = string
+
+}
+

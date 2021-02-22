@@ -28,7 +28,7 @@ resource "azurerm_kubernetes_cluster" "icap-deploy" {
   default_node_pool {
     name            = var.node_name
     node_count      = 4
-    vm_size         = "Standard_DS4_v2"
+    vm_size         = "Standard_DS3_v2"
     os_disk_size_gb = 100
 
     enable_auto_scaling = true
@@ -90,6 +90,11 @@ resource "helm_release" "ingress-nginx" {
   wait             = true
   cleanup_on_fail  = true
 
+  set {
+        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-dns-label-name"
+        value = var.a_record_01
+    }
+
   depends_on = [ 
     azurerm_kubernetes_cluster.icap-deploy,
    ]
@@ -111,12 +116,12 @@ resource "helm_release" "administration" {
 
   set {
         name  = "managementui.ingress.host"
-        value = var.dns_name_02
+        value = var.dns_name_04
     }
 
   set {
         name  = "identitymanagementservice.configuration.ManagementUIEndpoint"
-        value = var.dns_name_03
+        value = var.dns_name_04
     }
 
   depends_on = [ 
@@ -185,7 +190,7 @@ resource "null_resource" "get_kube_context" {
 
  provisioner "local-exec" {
 
-    command = "/bin/bash az aks get-credentials --resource-group ${var.resource_group} --name ${var.cluster_name} --overwrite-existing"
+    command = "az aks get-credentials --resource-group ${var.resource_group} --name ${var.cluster_name} --overwrite-existing"
   }
   
   depends_on = [
@@ -197,7 +202,7 @@ resource "null_resource" "load_k8_secrets" {
 
  provisioner "local-exec" {
 
-    command = "/bin/bash ./scripts/k8s_scripts/create-ns-docker-secret-ukw.sh"
+    command = "/bin/bash ./scripts/k8s_scripts/create-ns-docker-secret-ukw.sh ${var.storage_resource} ${var.kv_vault_name} ${var.cluster_name}"
   }
 
   depends_on = [

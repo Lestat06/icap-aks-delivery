@@ -2,7 +2,7 @@
 variable "resource_group" {
   description = "This is a consolidated name based on org, environment, region"
   type        = string
-  default 	  = "gw-icap-aks-delivery"
+  default 	  = "gw-icap-aks-file-drop-ukw"
 }
 
 variable "region" {
@@ -14,7 +14,7 @@ variable "region" {
 variable "cluster_name" {
   description = "This is a consolidated name based on org, environment, region"
   type        = string
-  default     = "gw-icap-aks-delivery-file-drop"
+  default     = "gw-icap-aks-file-drop"
 }
 
 variable "node_name" {
@@ -43,11 +43,18 @@ variable "chart_path01" {
   default 	  = "./charts/icap-infrastructure/filedrop"
 }
 
-variable "dns_name_01" {
+variable "file_drop_dns_name_01" {
   description = "This is the DNS name for the ingress"
   type        = string
-  default     = "file-drop-ukw.ukwest.cloudapp.azure.com"
+  default     = "file-drop.ukwest.cloudapp.azure.com"
 }
+
+variable "a_record_02" {
+  description = "A record for File-Drop"
+  type = string
+  default = "file-drop"
+}
+
 
 ## Cert-Manager Chart
 variable "release_name02" {
@@ -84,5 +91,5 @@ variable "namespace03" {
 variable "chart_repo03" {
   description = "This is the path to the chart"
   type        = string
-  default 	  = "ingress-nginx/ingress-nginx"
+  default 	  = "charts/icap-infrastructure/ingress-nginx"
 }
